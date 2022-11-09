@@ -135,6 +135,7 @@ class CIT_Base(object):
                len(set(Ys).intersection(condition_set)) == 0, "X, Y cannot be in condition_set."
         return Xs, Ys, condition_set, _stringize(Xs, Ys, condition_set)
 
+import sys
 class FisherZ(CIT_Base):
     def __init__(self, data, **kwargs):
         super().__init__(data, **kwargs)
@@ -160,9 +161,11 @@ class FisherZ(CIT_Base):
         sub_corr_matrix = self.correlation_matrix[np.ix_(var, var)]
         try:
             inv = np.linalg.inv(sub_corr_matrix)
-        except np.linalg.LinAlgError:
-            raise ValueError('Data correlation matrix is singular. Cannot run fisherz test. Please check your data.')
-        r = -inv[0, 1] / sqrt(inv[0, 0] * inv[1, 1])
+            r = -inv[0, 1] / sqrt(inv[0, 0] * inv[1, 1])
+        except Exception as e:
+            print('Data correlation matrix is singular. Cannot run fisherz test. Please check your data.', e, file=sys.stderr)
+            return 0.0
+            # raise ValueError('Data correlation matrix is singular. Cannot run fisherz test. Please check your data.')
         Z = 0.5 * log((1 + r) / (1 - r))
         X = sqrt(self.sample_size - len(condition_set) - 3) * abs(Z)
         p = 2 * (1 - norm.cdf(abs(X)))

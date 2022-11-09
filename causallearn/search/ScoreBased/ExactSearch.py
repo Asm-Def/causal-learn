@@ -364,6 +364,8 @@ def bic_score_node(X, i, structure):
         _, residual, _, _ = np.linalg.lstsq(a=X[:, structure],
                                             b=X[:, i],
                                             rcond=None)
+    if residual.size == 0:
+        return -INF
     bic = n * np.log(residual / n) + len(structure) * np.log(n)
     return bic.item()
 
