@@ -69,7 +69,8 @@ def searchAtDepth0(data: ndarray, nodes: List[Node], adjacencies: Dict[Node, Set
             p_value = independence_test_method(i, j, tuple(empty))
             independent = p_value > alpha
             no_edge_required = True if knowledge is None else \
-                ((not knowledge.is_required(nodes[i], nodes[j])) or knowledge.is_required(nodes[j], nodes[i]))
+                (not (knowledge.is_required(nodes[i], nodes[j]) or knowledge.is_required(nodes[j], nodes[i])))
+                # ((not knowledge.is_required(nodes[i], nodes[j])) or knowledge.is_required(nodes[j], nodes[i]))
             if independent and no_edge_required:
                 sep_sets[(i, j)] = set()
 
@@ -108,8 +109,8 @@ def searchAtDepth(data: ndarray, depth: int, nodes: List[Node], adjacencies: Dic
                     independent = p_value > alpha
 
                     no_edge_required = True if knowledge is None else (
-                            not knowledge.is_required(nodes[i], adjx[j]) or knowledge.is_required(adjx[j],
-                                                                                                  nodes[i]))
+                            not (knowledge.is_required(nodes[i], adjx[j]) or knowledge.is_required(adjx[j],
+                                                                                                  nodes[i])))
                     if independent and no_edge_required:
 
                         if adjacencies[nodes[i]].__contains__(adjx[j]):

@@ -61,7 +61,12 @@ def skeleton_discovery(
 
     depth = -1
     pbar = tqdm(total=no_of_var) if show_progress else None
+    max_iter = 32
     while cg.max_degree() - 1 > depth:
+        max_iter -= 1
+        if max_iter == 0:
+            print("max_iter exceeded, returning")
+            break
         depth += 1
         edge_removal = []
         if show_progress:
@@ -72,6 +77,7 @@ def skeleton_discovery(
             if show_progress:
                 pbar.set_description(f'Depth={depth}, working on node {x}')
             Neigh_x = cg.neighbors(x)
+            print("Neigh_{} = {}".format(x, Neigh_x))
             if len(Neigh_x) < depth - 1:
                 continue
             for y in Neigh_x:
@@ -128,7 +134,11 @@ def skeleton_discovery(
 
         for (x, y) in list(set(edge_removal)):
             edge1 = cg.G.get_edge(cg.G.nodes[x], cg.G.nodes[y])
-            if edge1 is not None:
+            if edge1 is not None and (background_knowledge is None or not (
+                background_knowledge.is_required(cg.G.nodes[x], cg.G.nodes[y]) or
+                background_knowledge.is_required(cg.G.nodes[y], cg.G.nodes[x]))):
+                print("removing {} {}".format(x, y))
+                print(edge1.node1.get_name(), edge1.node2.get_name())
                 cg.G.remove_edge(edge1)
 
     if show_progress:

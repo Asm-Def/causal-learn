@@ -472,7 +472,8 @@ class D_Separation(CIT_Base):
         super().__init__(data, **kwargs)  # data is just a placeholder, not used in D_Separation
         self.check_cache_method_consistent('d_separation', NO_SPECIFIED_PARAMETERS_MSG)
         self.true_dag = true_dag
-        import networkx as nx; global nx
+        global nx
+        import networkx as nx
         # import networkx here violates PEP8; but we want to prevent unnecessary import at the top (it's only used here)
 
     def __call__(self, X, Y, condition_set=None):
