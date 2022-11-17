@@ -135,7 +135,7 @@ class CIT_Base(object):
                len(set(Ys).intersection(condition_set)) == 0, "X, Y cannot be in condition_set."
         return Xs, Ys, condition_set, _stringize(Xs, Ys, condition_set)
 
-import sys
+import sys, math
 class FisherZ(CIT_Base):
     def __init__(self, data, **kwargs):
         super().__init__(data, **kwargs)
@@ -159,6 +159,8 @@ class FisherZ(CIT_Base):
         if cache_key in self.pvalue_cache: return self.pvalue_cache[cache_key]
         var = Xs + Ys + condition_set
         sub_corr_matrix = self.correlation_matrix[np.ix_(var, var)]
+        print("corr_matrix of ", Xs, Ys)
+        print(sub_corr_matrix)
         try:
             inv = np.linalg.inv(sub_corr_matrix)
             r = -inv[0, 1] / sqrt(inv[0, 0] * inv[1, 1])
@@ -166,10 +168,16 @@ class FisherZ(CIT_Base):
             X = sqrt(self.sample_size - len(condition_set) - 3) * abs(Z)
             p = 2 * (1 - norm.cdf(abs(X)))
         except Exception as e:
-            print('Data correlation matrix is singular. Cannot run fisherz test. Please check your data.', e, file=sys.stderr)
-            p = 1.0
+            print(f'Data correlation matrix is singular for ({Xs}, {Ys}, {condition_set}). \
+                Cannot run fisherz test. Please check your data.', e, file=sys.stderr)
+            X = math.inf
+            p = 0.0
             # raise ValueError('Data correlation matrix is singular. Cannot run fisherz test. Please check your data.')
         self.pvalue_cache[cache_key] = p
+        if 'X' not in self.__dict__.keys():
+            self.X = {cache_key: math.log(1 + X)}
+        else:
+            self.X[cache_key] = math.log(1 + X)
         return p
 
 class KCI(CIT_Base):
